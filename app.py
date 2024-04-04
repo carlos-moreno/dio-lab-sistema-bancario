@@ -67,7 +67,7 @@ def obter_extrato():
     extrato = globals().get("extrato")
     saldo = globals().get("saldo")
     print(" Extrato ".center(50, "="))
-    print("\n".join(extrato))
+    print("\n".join(extrato) if extrato else "Não foram identificadas movimentações na conta.")
     print(f"\nSaldo: {saldo:.2f}")
     print("".center(50, "="))
 
