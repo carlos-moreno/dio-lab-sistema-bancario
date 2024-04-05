@@ -5,7 +5,7 @@ __version__ = "v0.1.0"
 __author__ = "Carlos Moreno"
 
 menu = """\
-[d/D] Deposito
+[d/D] Depósito
 [s/S] Saque
 [e/E] Extrato
 [q/Q] Sair
@@ -21,17 +21,20 @@ QTD_LIMITE_SAQUE = 3
 
 
 def depositar():
+    """Função responsável por tratar a funcionalidade de depósito"""
     saldo = globals().get("saldo")
-    print(" Operação de Deposito ".center(50, "="))
-    valor = float(input("Informe o valor do deposito: "))
+    print(" Operação de Depósito ".center(50, "="))
+    valor = float(input("Informe o valor do depósito: "))
+    
     if valor > 0:
         saldo += valor
-        extrato.append(f"C(+)\t{valor}")
-    print(f"Deposito no valor de {valor:.2f} realizado com sucesso!")
+        extrato.append(f"C(+)\tR$ {valor}")
+    print(f"Depósito no valor de R$ {valor:.2f} realizado com sucesso!")
     return saldo
 
 
 def sacar():
+    """Função responsável por tratar a funcionalidade de saque"""
     saldo = globals().get("saldo")
     QTD_LIMITE_SAQUE = globals().get("QTD_LIMITE_SAQUE")
     qtd_saques_dia = globals().get("qtd_saques_dia")
@@ -48,8 +51,8 @@ def sacar():
     ):
         saldo -= valor
         qtd_saques_dia += 1
-        extrato.append(f"D(-)\t{valor}")
-        print(f"Saque no valor de {valor:.2f} realizado com sucesso!")
+        extrato.append(f"D(-)\tR$ {valor}")
+        print(f"Saque no valor de R$ {valor:.2f} realizado com sucesso!")
         print(
             f"Você ainda possui {QTD_LIMITE_SAQUE - qtd_saques_dia} "
             f"saque(s) no dia no valor de R$ {LIMITE}"
@@ -58,17 +61,18 @@ def sacar():
         print("Saque inválido!")
         print(
             "OBS.: O valor solicitado deve ser menor ou igual ao saldo "
-            f"atual de {saldo:.2f} e menor ou igual a que R$ 500"
+            f"atual de R$ {saldo:.2f} e menor ou igual ao limite de R$ 500"
         )
-    return saldo
+    return saldo, qtd_saques_dia
 
 
 def obter_extrato():
+    """Função responsável por demonstrar as movimentações na conta"""
     extrato = globals().get("extrato")
     saldo = globals().get("saldo")
     print(" Extrato ".center(50, "="))
-    print("\n".join(extrato) if extrato else "Não foram identificadas movimentações na conta.")
-    print(f"\nSaldo: {saldo:.2f}")
+    print("\n".join(extrato) if extrato else "Conta sem movimentações a ser informada.")
+    print(f"\nSaldo: R$ {saldo:.2f}")
     print("".center(50, "="))
 
 
@@ -79,7 +83,7 @@ while True:
     if opcao == "d":
         saldo = depositar()
     elif opcao == "s":
-        saldo = sacar()
+        saldo, qtd_saques_dia = sacar()
     elif opcao == "e":
         obter_extrato()
     elif opcao == "q":
