@@ -8,16 +8,17 @@ __author__ = "Carlos Moreno"
 
 usuarios = dict()
 contas = dict()
+extratos = dict()
 AGENCIA = "0001"
 
 opcoes = """\
-    [c/C] Cadastrar Conta
-    [d/D] Depositar
-    [e/E] Exibir Extrato
+  [c/C]   Cadastrar Conta
+  [d/D]   Depositar
+  [e/E]   Exibir Extrato
   [lc/LC] Listar Contas
   [lu/LU] Listar Usuários
-    [s/S] Sacar
-    [u/U] Cadastrar Usuário
+  [s/S]   Sacar
+  [u/U]   Cadastrar Usuário
 ==> """
 
 
@@ -144,6 +145,26 @@ def listar_contas():
 
     return "\n#####\n".join(l)
 
+def depositar(conta: str, valor: float) -> str:
+    """Depositar saldo na conta.
+
+    A função `depositar` tem a finalizadade de cuidar do depósito de saldo
+    na conta bancária do cliente.
+
+    Parameters
+    ----------
+        conta: str
+            Conta do Cliente onde o saldo vai ser adicionado
+        valor: float
+            Valor a ser depositado
+
+    Returns
+    -------
+        str
+    """
+    extratos.setdefault(conta, []).append(f"D(+)    {valor:.2f}")
+    return f"Deposito no valor de R$ {valor:.2f} para a conta {conta} realizado com sucesso!"
+
 
 def main():
     while True:
@@ -168,9 +189,26 @@ def main():
                         "verifique o dado informado e tente novamente"
                     )
             case "d":
-                ...
+                msg = (
+                    "Para o procedimento de Deposito, por favor, preencha os "
+                    "dados solicitados a seguir."
+                )
+                print(msg)
+                conta = input(
+                    "Informe a Conta do Usuário a ser depositado o valor: "
+                )
+                valor = input(
+                    "Qual o valor a ser depositado: "
+                )
+                if contas.get(conta) is not None:
+                    resultado = depositar(conta, valor)
+                    print(resultado)
+                else:
+                    print(
+                        f"A Conta {conta} informada para deposito não existe!"
+                    )
             case "e":
-                ...
+                print(extratos)
             case "lc":
                 print(" Contas Cadastradas no Sistema ".center(50, "="))
                 resultado = listar_contas()
