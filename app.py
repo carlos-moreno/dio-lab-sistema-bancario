@@ -172,7 +172,7 @@ def depositar(conta: str, valor: float) -> str:
         saldo += float(valor)
     saldos[conta] = saldo
     return (
-        f"Deposito no valor de R$ {valor:.2f} para a conta {conta} realizado "
+        f"Depósito no valor de R$ {valor:.2f} para a conta {conta} realizado "
         "com sucesso!"
     )
 
@@ -201,20 +201,52 @@ def sacar(conta: str, valor: float) -> str:
         limites_saque.get(conta) is None
         or (
             limites_saque.get(conta) is not None
-            and limites_saque.get(conta) <= 3
+            and limites_saque.get(conta) < 3
         )
     )
     valor_permitido = (valor <= 500) and (valor <= saldo)
     if tem_saque_disponivel and valor_permitido:
         extratos.setdefault(conta, []).append(f"C(-)    {valor:.2f}")
+        limites_saque[conta] = limites_saque.get(conta, 0) + 1
         saldo -= float(valor)
         saldos[conta] = saldo
-        print(saldos)
-        return f"Saque no valor de R$ {valor:.2f} da conta {conta} realizado com sucesso!"
+        return (
+            f"Saque no valor de R$ {valor:.2f} da conta {conta} realizado "
+            "com sucesso!"
+        )
     elif tem_saque_disponivel is False:
         return "Quantidade de saques excedidas no dia!"
     elif valor_permitido is False:
-        return f"Valor a ser sacado deve ser menor que R$ 500 e menor ou igual a R$ {saldo}"
+        return (
+            f"Valor a ser sacado deve ser menor que R$ 500 e menor ou igual "
+            f"a R$ {saldo}"
+        )
+
+
+def obter_extrato(conta: str):
+    """Obter o extrato da conta.
+
+    A função `obter_extrato` tem a finalizadade de exibir as movimentações
+    na conta bancária do cliente.
+
+    Parameters
+    ----------
+        conta: str
+            Conta do Cliente a ser exibido o extrato
+
+    Returns
+    -------
+        str
+    """
+    print(" Extrato ".center(50, "="))
+    extrato = extratos.get(conta)
+    if extrato:
+        print(f"Conta: {conta}")
+        print("\n".join(extrato))
+        print(f"Saldo: R$ {saldos.get(conta):.2f}")
+    else:
+        print("Nenhuma movimentação encontrada.")
+    print("".center(50, "="))
 
 
 def main():
@@ -257,7 +289,15 @@ def main():
                         f"A Conta {conta} informada para deposito não existe!"
                     )
             case "e":
-                print(extratos)
+                msg = (
+                    "Para verificar o extrado, por favor, preencha os "
+                    "dados solicitados a seguir."
+                )
+                print(msg)
+                conta = input(
+                    "Informe a Conta do Usuário a ser exibido o extrato: "
+                )
+                obter_extrato(conta)
             case "lc":
                 print(" Contas Cadastradas no Sistema ".center(50, "="))
                 resultado = listar_contas()
