@@ -9,6 +9,8 @@ __author__ = "Carlos Moreno"
 usuarios = dict()
 contas = dict()
 extratos = dict()
+saldos = dict()
+limites_saque = dict()
 AGENCIA = "0001"
 
 opcoes = """\
@@ -145,6 +147,7 @@ def listar_contas():
 
     return "\n#####\n".join(l)
 
+
 def depositar(conta: str, valor: float) -> str:
     """Depositar saldo na conta.
 
@@ -163,7 +166,55 @@ def depositar(conta: str, valor: float) -> str:
         str
     """
     extratos.setdefault(conta, []).append(f"D(+)    {valor:.2f}")
-    return f"Deposito no valor de R$ {valor:.2f} para a conta {conta} realizado com sucesso!"
+    saldo = float(valor)
+    if saldos.get(conta):
+        saldo = float(saldos.get(conta))
+        saldo += float(valor)
+    saldos[conta] = saldo
+    return (
+        f"Deposito no valor de R$ {valor:.2f} para a conta {conta} realizado "
+        "com sucesso!"
+    )
+
+
+def sacar(conta: str, valor: float) -> str:
+    """Sacar valor da conta.
+
+    A função `sacar` tem a finalizadade de cuidar dos saques na conta
+    bancária do cliente.
+
+    Parameters
+    ----------
+        conta: str
+            Conta do Cliente onde o saldo vai ser adicionado
+        valor: float
+            Valor a ser sacado
+        limite: int
+            Limite de saques
+
+    Returns
+    -------
+        str
+    """
+    saldo = float(saldos.get(conta))
+    tem_saque_disponivel = bool(
+        limites_saque.get(conta) is None
+        or (
+            limites_saque.get(conta) is not None
+            and limites_saque.get(conta) <= 3
+        )
+    )
+    valor_permitido = (valor <= 500) and (valor <= saldo)
+    if tem_saque_disponivel and valor_permitido:
+        extratos.setdefault(conta, []).append(f"C(-)    {valor:.2f}")
+        saldo -= float(valor)
+        saldos[conta] = saldo
+        print(saldos)
+        return f"Saque no valor de R$ {valor:.2f} da conta {conta} realizado com sucesso!"
+    elif tem_saque_disponivel is False:
+        return "Quantidade de saques excedidas no dia!"
+    elif valor_permitido is False:
+        return f"Valor a ser sacado deve ser menor que R$ 500 e menor ou igual a R$ {saldo}"
 
 
 def main():
@@ -197,9 +248,7 @@ def main():
                 conta = input(
                     "Informe a Conta do Usuário a ser depositado o valor: "
                 )
-                valor = input(
-                    "Qual o valor a ser depositado: "
-                )
+                valor = float(input("Qual o valor a ser depositado: "))
                 if contas.get(conta) is not None:
                     resultado = depositar(conta, valor)
                     print(resultado)
@@ -226,7 +275,20 @@ def main():
                     else "Nenhum Usuário cadastrado no sistema.\n"
                 )
             case "s":
-                ...
+                msg = (
+                    "Para o procedimento de Saque, por favor, preencha os "
+                    "dados solicitados a seguir."
+                )
+                print(msg)
+                conta = input(
+                    "Informe a Conta do Usuário a ser sacado o valor: "
+                )
+                valor = float(input("Qual o valor a ser sacado: "))
+                if contas.get(conta) is not None:
+                    resultado = sacar(conta, valor)
+                    print(resultado)
+                else:
+                    print(f"A Conta {conta} informada para saque não existe!")
             case "u":
                 msg = (
                     "Cadastrando um Novo Usuário, por favor, preencha os "
